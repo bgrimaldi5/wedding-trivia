@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Trivia — Host Panel 👑</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Admin-specific overrides */
+    body { background-color: #1A2E3E; background-image: none; }
+
+    .admin-page {
+      width: 100%;
+      max-width: 640px;
+      min-height: 100vh;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .admin-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--white);
+      margin: 0;
+      text-align: left;
+    }
+
+    .admin-header .badge { font-size: 0.7rem; }
+
+    .admin-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      width: 100%;
+    }
+
+    .admin-card h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+      font-family: var(--font-body);
+      font-weight: 700;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--blue-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--text-light);
+      flex-shrink: 0;
+    }
+
+    .status-indicator.lobby   { background: var(--gold); animation: pulse 1.5s infinite; }
+    .status-indicator.active  { background: var(--success); animation: pulse 1.5s infinite; }
+    .status-indicator.reveal  { background: var(--blue-mid); }
+    .status-indicator.finished { background: var(--text-light); }
+
+    .status-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      flex: 1;
+    }
+
+    .status-detail {
+      font-size: 0.78rem;
+      color: var(--text-light);
+    }
+
+    /* Control button grid */
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .control-grid .btn { font-size: 0.88rem; padding: 0.75rem 0.5rem; }
+    .control-grid .btn-full { grid-column: 1 / -1; }
+
+    /* Question preview card */
+    .question-preview {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      border-left: 3px solid var(--blue-deep);
+    }
+
+    .question-preview .q-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-light);
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .question-preview .q-text {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--blue-dark);
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+      text-align: left;
+    }
+
+    .question-preview .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .question-preview .opt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-mid);
+    }
+
+    .question-preview .opt .ltr {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      flex-shrink: 0;
+    }
+
+    .question-preview .opt.correct .ltr {
+      background: var(--success);
+      color: white;
+    }
+
+    .question-preview .opt.correct {
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+
+    /* Answer count bar */
+    .answer-tally {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .tally-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .tally-letter {
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .tally-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--blue-light);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .tally-bar-fill {
+      height: 100%;
+      background: var(--blue-mid);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .tally-count {
+      font-weight: 700;
+      color: var(--text-dark);
+      min-width: 1.5rem;
+      text-align: right;
+    }
+
+    /* Mini leaderboard */
+    .mini-leaderboard {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .mini-leaderboard li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+    }
+
+    .mini-leaderboard li:nth-child(1) { background: #fff8e1; }
+
+    .mini-lb-rank { color: var(--text-light); width: 1.2rem; font-weight: 700; }
+    .mini-lb-name { flex: 1; font-weight: 700; color: var(--text-dark); }
+    .mini-lb-score { color: var(--blue-deep); font-weight: 700; font-family: var(--font-display); }
+
+    /* Danger zone */
+    .danger-zone {
+      border: 1px solid rgba(224, 85, 85, 0.3);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      background: rgba(224, 85, 85, 0.04);
+    }
+
+    .danger-zone h3 { color: var(--error) !important; }
+
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--blue-dark);
+      color: white;
+      padding: 0.65rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      white-space: nowrap;
+    }
+
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (min-width: 480px) {
+      .admin-page { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-page">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <h1>💍 Wedding Trivia &nbsp;<span style="opacity:0.5">—</span>&nbsp; Host Panel</h1>
+      <span class="badge badge-gold">👑 Admin</span>
+    </div>
+
+    <!-- Game Status Bar -->
+    <div class="admin-card">
+      <h3>Game Status</h3>
+      <div class="status-bar">
+        <div class="status-indicator lobby" id="status-dot"></div>
+        <span class="status-label" id="status-label">Lobby — Waiting for players</span>
+        <span class="status-detail" id="status-detail"></span>
+      </div>
+
+      <!-- Stats row -->
+      <div class="admin-stat-row">
+        <div class="admin-stat">
+          <div class="admin-stat-number" id="stat-players">0</div>
+          <div class="admin-stat-label">Players</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-number" id="stat-question">—</div>
+          <div class="admin-stat-label">Question</div>
+        </div>
+        <div class="admin-stat">
+          <div class="admin-stat-number" id="stat-answers">0</div>
+          <div class="admin-stat-label">Answered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="admin-card">
+      <h3>Controls</h3>
+      <div class="control-grid">
+
+        <!-- START GAME — shown only in lobby -->
+        <button class="btn btn-success btn-full" id="btn-start" onclick="startGame()">
+          ▶ &nbsp; Start Game
+        </button>
+
+        <!-- LOCK ANSWERS — shown when question is active -->
+        <button class="btn btn-gold hidden" id="btn-lock" onclick="lockAnswers()">
+          🔒 &nbsp; Lock Answers
+        </button>
+
+        <!-- REVEAL ANSWER — shown after locking -->
+        <button class="btn btn-primary hidden" id="btn-reveal" onclick="revealAnswer()">
+          ✨ &nbsp; Reveal Answer
+        </button>
+
+        <!-- NEXT QUESTION — shown after reveal -->
+        <button class="btn btn-outline hidden" id="btn-next" onclick="nextQuestion()">
+          ⏭ &nbsp; Next Question
+        </button>
+
+        <!-- END GAME — shown after reveal on last question -->
+        <button class="btn btn-danger hidden" id="btn-end" onclick="endGame()">
+          🏁 &nbsp; End Game
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Current Question Preview -->
+    <div class="admin-card" id="card-question-preview">
+      <h3>Current Question</h3>
+      <div class="question-preview" id="question-preview">
+        <div class="q-label">Waiting to start...</div>
+      </div>
+    </div>
+
+    <!-- Answer Tally (live) -->
+    <div class="admin-card" id="card-tally">
+      <h3>Live Answer Tally</h3>
+      <div class="answer-tally" id="answer-tally">
+        <p style="font-size:0.85rem; color:var(--text-light)">No answers yet</p>
+      </div>
+    </div>
+
+    <!-- Players Joined -->
+    <div class="admin-card">
+      <h3>Players Joined</h3>
+      <ul class="player-list" id="player-list">
+        <li style="font-size:0.85rem; color:var(--text-light)">No players yet...</li>
+      </ul>
+    </div>
+
+    <!-- Live Leaderboard -->
+    <div class="admin-card">
+      <h3>Live Leaderboard</h3>
+      <ul class="mini-leaderboard" id="admin-leaderboard">
+        <li><span class="mini-lb-name" style="color:var(--text-light)">Waiting for scores...</span></li>
+      </ul>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+      <h3 style="font-family:var(--font-body); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem;">⚠️ Danger Zone</h3>
+      <button class="btn btn-danger" onclick="resetGame()" style="font-size:0.85rem; padding:0.65rem;">
+        🔄 &nbsp; Reset Entire Game
+      </button>
+      <p style="font-size:0.75rem; color:var(--error); text-align:left; margin-top:0.5rem; opacity:0.8;">
+        This clears all players, answers, and resets to lobby. Questions are preserved.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/admin.js"></script>
+
+</body>
+</html>

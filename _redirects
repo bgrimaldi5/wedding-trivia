@@ -1,0 +1,11 @@
+# Cloudflare Pages — _redirects file
+# Place this in the root of your project.
+# It tells Cloudflare how to handle URL routing.
+
+# All routes serve their respective HTML files directly.
+# No rewrites needed for this static multi-page setup.
+
+# Optional: If you want a cleaner admin URL without .html extension
+# /admin   /admin.html   200
+# /play    /play.html    200
+# /import  /import.html  200

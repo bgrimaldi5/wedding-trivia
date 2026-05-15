@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Trivia — Import Questions</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .import-page { max-width: 560px; }
+
+    .upload-zone {
+      border: 2px dashed var(--blue-mid);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      background: var(--cream);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--blue-deep);
+      background: var(--blue-light);
+    }
+
+    .upload-zone input[type="file"] {
+      display: none;
+    }
+
+    .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+    /* Preview table */
+    .preview-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--blue-light);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th {
+      background: var(--blue-dark);
+      color: white;
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      font-weight: 700;
+      font-family: var(--font-body);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid var(--blue-light);
+      color: var(--text-dark);
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: var(--cream); }
+    tr:last-child td { border-bottom: none; }
+
+    .correct-badge {
+      display: inline-block;
+      background: var(--success);
+      color: white;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .log-box {
+      background: #1A2E3E;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #8BC4E0;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .log-box .log-ok   { color: #4CAF82; }
+    .log-box .log-err  { color: #E05555; }
+    .log-box .log-info { color: #8BC4E0; }
+
+    .format-guide {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--gold);
+      padding: 1rem 1.25rem;
+    }
+
+    .format-guide table {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .format-guide th { background: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <div class="page import-page">
+
+    <div class="text-center fade-in">
+      <div class="decoration">📊 ✦ 💍</div>
+      <h1 class="brand-title" style="font-size:1.8rem;">Import Questions</h1>
+      <p class="brand-subtitle">One-time setup — upload your Excel file</p>
+    </div>
+
+    <!-- Format Guide -->
+    <div class="card fade-in" style="animation-delay:0.05s">
+      <h3>Expected Excel Format</h3>
+      <div class="format-guide mt-sm">
+        <p style="text-align:left; font-size:0.85rem; color:var(--text-mid)">
+          Your <strong>.xlsx</strong> file should have <strong>no header row</strong>, starting with questions in row 1:
+        </p>
+        <div class="preview-wrap mt-sm">
+          <table>
+            <thead>
+              <tr>
+                <th>Col A — Question</th>
+                <th>Col B — Option A</th>
+                <th>Col C — Option B</th>
+                <th>Col D — Option C</th>
+                <th>Col E — Correct</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Where did they meet?</td>
+                <td>College</td>
+                <td>Work</td>
+                <td>Coffee shop</td>
+                <td>B</td>
+              </tr>
+              <tr>
+                <td>Year they got engaged?</td>
+                <td>2022</td>
+                <td>2023</td>
+                <td><em style="color:var(--text-light)">(blank)</em></td>
+                <td>A</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="text-align:left; font-size:0.8rem; color:var(--text-light); margin-top:0.5rem;">
+          ✦ Leave column D blank for 2-choice questions — the blank option will not be shown to players.<br>
+          ✦ Column E must be exactly <strong>A</strong>, <strong>B</strong>, or <strong>C</strong> (uppercase).
+        </p>
+      </div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="card fade-in" style="animation-delay:0.1s">
+      <h3>Upload Your File</h3>
+
+      <div class="upload-zone mt-sm" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📁</div>
+        <p style="font-weight:700; color:var(--blue-deep); margin-bottom:0.25rem;">
+          Click to choose your Excel file
+        </p>
+        <p style="font-size:0.82rem; color:var(--text-light)">or drag and drop here</p>
+        <p style="font-size:0.78rem; color:var(--text-light); margin-top:0.5rem;">
+          Accepts .xlsx files only
+        </p>
+        <input type="file" id="file-input" accept=".xlsx" onchange="handleFileSelect(event)" />
+      </div>
+
+      <p id="file-name-display" class="mt-sm text-center hidden" style="font-size:0.85rem; color:var(--blue-deep); font-weight:700;"></p>
+    </div>
+
+    <!-- Preview -->
+    <div class="card hidden fade-in" id="preview-card">
+      <h3>Preview (<span id="preview-count">0</span> questions found)</h3>
+      <div class="preview-wrap mt-sm">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Question</th>
+              <th>Options</th>
+              <th>Answer</th>
+            </tr>
+          </thead>
+          <tbody id="preview-body">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Validation errors -->
+      <div id="validation-errors" class="hidden mt-md">
+        <p style="color:var(--error); font-weight:700; font-size:0.85rem;">⚠️ Issues found — please fix your Excel file:</p>
+        <ul id="error-list" style="font-size:0.82rem; color:var(--error); margin-top:0.4rem; padding-left:1.25rem; line-height:1.8;"></ul>
+      </div>
+
+      <button class="btn btn-primary mt-md" id="import-btn" onclick="importQuestions()">
+        📥 &nbsp; Import to Database
+      </button>
+    </div>
+
+    <!-- Log output -->
+    <div class="card hidden" id="log-card">
+      <h3>Import Log</h3>
+      <div class="log-box mt-sm" id="log-box"></div>
+      <button class="btn btn-outline mt-md" onclick="window.location.reload()" style="font-size:0.85rem;">
+        🔄 &nbsp; Import Another File
+      </button>
+      <a href="admin.html" class="btn btn-primary mt-sm" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; text-decoration:none;">
+        👑 &nbsp; Go to Admin Panel
+      </a>
+    </div>
+
+  </div>
+
+  <!-- SheetJS for reading Excel files -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/import.js"></script>
+
+</body>
+</html>

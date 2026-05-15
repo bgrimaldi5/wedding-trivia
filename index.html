@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Trivia 💍</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div class="page" id="joinPage">
+
+    <!-- Header -->
+    <div class="text-center fade-in">
+      <div class="decoration">💍 ✦ 💍</div>
+      <h1 class="brand-title">Wedding Trivia</h1>
+      <p class="brand-subtitle" id="landing-quote"></p>
+    </div>
+
+    <!-- Join Card -->
+    <div class="card fade-in" style="animation-delay: 0.1s">
+      <h2>Join the Game</h2>
+      <div class="divider">✦ ✦ ✦</div>
+
+      <div class="input-group mt-md">
+        <label for="playerName">Your Name</label>
+        <input
+          type="text"
+          id="playerName"
+          placeholder="e.g. Jordan Fisher"
+          maxlength="30"
+          autocomplete="off"
+          autocapitalize="words"
+        />
+      </div>
+
+      <!-- Error message (hidden by default) -->
+      <p id="errorMsg" class="text-error mt-sm hidden" style="text-align:left; font-size:0.85rem;"></p>
+
+      <button class="btn btn-primary mt-md" id="joinBtn" onclick="joinGame()">
+        💌 &nbsp; Join the Celebration
+      </button>
+    </div>
+
+    <!-- Status message (e.g. "Game not started yet") -->
+    <p id="statusMsg" class="pulse hidden" style="color: var(--text-light); font-size:0.85rem;"></p>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    const quotes = [
+      "The couple that budgets together stays together… mostly because Josie can't do her own taxes – Ben Grimaldi",
+      "Honestly anyone that judges someone for eating a dessert, f*ck em. What are you judging me for? Go eat your lettuce — Josie Thomas",
+      "Whoever said money can't buy happiness either didn't have enough or doesn't know how to spend it right – Ben Grimaldi",
+      "Going and getting dessert with a girl is pretty much the same thing as cheating on me — Josie Thomas",
+      "I was born in New Jersey and grew up in Ohio, I think that automatically makes me good at corn farming – Ben Grimaldi",
+      "It doesn't count toward the budget because I used cash — Josie Thomas",
+      "I have the facial hair genetics of a bar of soap – Ben Grimaldi",
+      "I feel like I could absolutely run faster than an elephant — Josie Thomas",
+      "My putting game is so bad I don't think I could win the PGA Tour even if I got to start on the edge of the green on every hole – Ben Grimaldi",
+      "I think he had prosthetic cancer — Josie Thomas",
+      "I'm so Polish I don't need a UV index. If the sun is visible, my pasty ass is at risk of getting burnt. – Ben Grimaldi",
+      "I'm pretty sure citric acid just means there's some orange juice in it — Josie Thomas",
+      "If you're going to go through the effort of training for a marathon, at least make it one that's going to make it worth it for me — Josie Thomas",
+    ];
+    document.getElementById('landing-quote').textContent = '\u201c' + quotes[Math.floor(Math.random() * quotes.length)] + '\u201d';
+  </script>
+  <script src="js/landing.js"></script>
+
+</body>
+</html>

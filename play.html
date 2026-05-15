@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Trivia 💍</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       SCREEN 1: LOBBY (waiting for host to start)
+       ============================================================ -->
+  <div class="page" id="screen-lobby">
+    <div class="text-center fade-in">
+      <div class="decoration">💍 ✦ 💍</div>
+      <h1 class="brand-title">Wedding Trivia</h1>
+      <p class="brand-subtitle" id="lobby-quote"></p>
+    </div>
+
+    <div class="card fade-in" style="animation-delay: 0.1s">
+      <h2>Welcome, <span id="lobby-player-name">Friend</span>! 🎉</h2>
+      <div class="divider">✦ ✦ ✦</div>
+      <p class="mt-md">The game will begin shortly.<br>Sit tight while everyone joins!</p>
+      <div class="waiting-dots mt-md">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="mt-md">
+        <span class="badge badge-blue" id="lobby-player-count">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCREEN 2: QUESTION (active gameplay)
+       ============================================================ -->
+  <div class="page hidden" id="screen-question">
+
+    <div class="card fade-in" style="width:100%">
+      <!-- Question number & score -->
+      <div class="question-header">
+        <span class="question-number" id="q-number">Question 1</span>
+        <span class="badge badge-gold" id="q-score">⭐ 0 pts</span>
+      </div>
+
+      <!-- The question text -->
+      <p class="question-text" id="q-text">Loading question...</p>
+
+      <!-- Answer choices — rendered dynamically by JS -->
+      <div class="answer-choices" id="answer-choices">
+        <!-- Buttons injected here -->
+      </div>
+
+      <!-- After answering: waiting message -->
+      <div id="q-waiting-msg" class="hidden mt-md text-center">
+        <div class="waiting-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <p class="mt-sm" style="font-size:0.85rem; color:var(--text-light)">
+          Answer submitted! Waiting for the host to reveal...
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       SCREEN 3: ANSWER REVEAL
+       ============================================================ -->
+  <div class="page hidden" id="screen-reveal">
+
+    <div class="card fade-in">
+      <h2>And the answer is…</h2>
+      <div class="divider">✦ ✦ ✦</div>
+
+      <!-- Result badge: correct or wrong -->
+      <div id="reveal-result" class="text-center mt-md" style="font-size:2rem;"></div>
+
+      <p id="reveal-message" class="mt-sm" style="font-weight:700; font-size:1rem;"></p>
+
+      <!-- The question again for context -->
+      <p id="reveal-question" class="mt-sm" style="font-size:0.85rem; color:var(--text-light)"></p>
+
+      <!-- Answer choices shown with correct highlighted -->
+      <div class="answer-choices mt-md" id="reveal-choices">
+        <!-- Re-rendered with correct/wrong states -->
+      </div>
+
+      <!-- Updated score -->
+      <div class="score-display mt-md">
+        <div class="score-number" id="reveal-score">0</div>
+        <div class="score-label">Your Total Score</div>
+      </div>
+
+      <p class="mt-md pulse" style="font-size:0.85rem; color:var(--text-light)">
+        Waiting for the next question...
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       SCREEN 4: FINAL LEADERBOARD
+       ============================================================ -->
+  <div class="page hidden" id="screen-leaderboard">
+
+    <div class="text-center fade-in">
+      <div class="decoration">🏆 ✦ 🏆</div>
+      <h1 class="brand-title">Final Results</h1>
+      <p class="brand-subtitle" id="leaderboard-rank-message">Loading your result...</p>
+    </div>
+
+    <div class="card fade-in" style="animation-delay: 0.1s">
+      <!-- Highlight the current player's rank -->
+      <div id="my-rank-display" class="score-display" style="margin-bottom:1rem;">
+        <div class="score-number" id="my-final-score">0</div>
+        <div class="score-label">Your Final Score</div>
+      </div>
+
+      <h3 class="text-center" style="margin-bottom:0.75rem;">Leaderboard</h3>
+      <ul class="leaderboard-list" id="final-leaderboard">
+        <!-- Populated by JS -->
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    const quotes = [
+      "The couple that budgets together stays together… mostly because Josie can't do her own taxes – Ben Grimaldi",
+      "Honestly anyone that judges someone for eating a dessert, f*ck em. What are you judging me for? Go eat your lettuce — Josie Thomas",
+      "Whoever said money can't buy happiness either didn't have enough or doesn't know how to spend it right – Ben Grimaldi",
+      "Going and getting dessert with a girl is pretty much the same thing as cheating on me — Josie Thomas",
+      "I was born in New Jersey and grew up in Ohio, I think that automatically makes me good at corn farming – Ben Grimaldi",
+      "It doesn't count toward the budget because I used cash — Josie Thomas",
+      "I have the facial hair genetics of a bar of soap – Ben Grimaldi",
+      "I feel like I could absolutely run faster than an elephant — Josie Thomas",
+      "My putting game is so bad I don't think I could win the PGA Tour even if I got to start on the edge of the green on every hole – Ben Grimaldi",
+      "I think he had prosthetic cancer — Josie Thomas",
+      "I'm so Polish I don't need a UV index. If the sun is visible, my pasty ass is at risk of getting burnt. – Ben Grimaldi",
+      "I'm pretty sure citric acid just means there's some orange juice in it — Josie Thomas",
+      "If you're going to go through the effort of training for a marathon, at least make it one that's going to make it worth it for me — Josie Thomas",
+    ];
+    const q = quotes[Math.floor(Math.random() * quotes.length)];
+    document.getElementById('lobby-quote').textContent = '\u201c' + q + '\u201d';
+  </script>
+  <script src="js/play.js"></script>
+
+</body>
+</html>
